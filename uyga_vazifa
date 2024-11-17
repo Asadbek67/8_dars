@@ -1,0 +1,113 @@
+import psycopg2 
+
+
+conn = psycopg2.connect(
+    dbname="dgango",
+    user="postgres",
+    password="a1100130a",
+    host="localhost"
+)
+
+
+cursor = conn.cursor()
+
+queries=[""""
+
+drop table if exists employees;
+drop table if exists departments;
+drop table if exists projects;
+-- 1
+create table if not exists departments (
+    id serial primary key,
+    department_name varchar(50) not null
+);
+
+insert into departments (department_name)
+values 
+	('Asadbek Sobirov'),
+	('abdulla raxmatov'),
+	('samandar isroilov'),
+	('jahongir fozilov');  
+
+-- 2
+create table if not exists employees(
+    id serial primary key,
+    first_name varchar(50) not null,
+    last_name varchar(50) not null,
+    positions varchar(150) not null,
+    salary numeric(10,2) not null,
+    hire_date date default current_date,
+    department_id int references departments(id)  
+);
+
+
+insert into employees (first_name, last_name, positions, salary, hire_date, department_id)
+values 
+    ('asadbek', 'sobirov', 'manager', 3000.00, '2020-03-15', 1),
+	('abdulla', 'raxmatov', 'manager', 450.00, '2020-03-15', 2),
+	('samandar', 'isroilov', 'manager', 8000.00, '2020-03-15', 3),
+	('jahongir', 'fozilov', 'manager', 4000.00, '2020-03-15', 4); 
+
+-- 3
+create table if not exists projects (
+    id serial primary key,
+    project_name varchar(50) not null,
+    start_date date default current_date,
+    end_date date default current_date,
+    budget numeric(5,2) not null
+);
+insert into projects (project_name, start_date  , end_date , budget )
+values 
+	('new project', '2023-01-10', '2023-06-30', 654.00),
+	('old project', '2023-01-10', null, 764.00);
+-- sql topshirigi
+-- 1
+select first_name ||' '|| last_name as full_name from employees;
+-- 2
+select first_name||' ' ||	last_name ||'  maoshi '|| salary as salary_group from employees
+order by salary desc;
+-- 3
+select * from  employees where salary>=2500;
+-- 4
+select * from  employees
+order by salary desc
+limit 3;
+
+select * from  employees 
+order by salary desc
+fetch next 3 rows only;
+-- 5
+select * from employees where salary in (4000.00 , 3000.00)
+-- 6
+select * from  employees 
+where salary
+between 2000.00 and 5000.00;
+-- 7
+select * from employees
+where  first_name
+	like ('%a') or
+first_name 
+	like('%a%') or
+first_name
+	like('a%');
+-- 8
+SELECT * 
+FROM projects
+WHERE end_date IS NULL;
+-- 9
+select department_id, avg (salary) as average_salary
+from employees group by department_id;
+
+
+
+"""]
+
+for query in queries:
+    cursor.execute(query)
+
+
+conn.commit()
+
+
+cursor.close()
+conn.close()
